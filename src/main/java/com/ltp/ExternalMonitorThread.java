@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,22 +23,25 @@ public class ExternalMonitorThread implements Runnable {
     private static final Logger LOG = Logger.getLogger(ExternalMonitorThread.class);
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+
     public void start() {
         final Runnable monitorRunner = new ExternalMonitorThread();
         scheduler.scheduleAtFixedRate(monitorRunner, 10, 10, TimeUnit.SECONDS);
     }
 
     public void run() {
+        
         try {
-            for (String address : Config.getDeviceAddresses()) {
-                readUrl(address);
+            Map<String, String> sensors = DeviceDiscoveryThread.getSonoffMap();
+            for (String address : sensors.keySet()) {
+                readUrl(address,sensors.get(address));
             }
         } catch (Exception e) {
             LOG.error("InterruptedException", e);
         }
     }
 
-    private static void readUrl(String address) {
+    private static void readUrl(String address, String hostname) {
         try {
             URL url = new URL("http://" + address + "/cm?cmnd=status%2010");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -49,7 +53,7 @@ public class ExternalMonitorThread implements Runnable {
             BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
             String output;
             while ((output = br.readLine()) != null) {
-                processInput(address, output);
+                processInput(address, hostname, output);
             }
             conn.disconnect();
         } catch (MalformedURLException e) {
@@ -59,12 +63,17 @@ public class ExternalMonitorThread implements Runnable {
         }
     }
 
-    private static void processInput(String address, String input) {
-        String deviceName = Config.getDeviceFriendlyName(address);
-        String deviceType = Config.getDeviceType(address);
-
-        Point point = "POW".equals(deviceType) ? SensorPower.generate(address, deviceName, input).getInfluxdbPoint()
-                : SensorTemp.generate(address, deviceName, input).getInfluxdbPoint();
-        Config.getDBConnection().save(point);
+    private static void processInput(String address, String hostname, String input) {
+        //TODO: Do we want to overide the name with something friendly
+        //String deviceName = Config.getDeviceFriendlyName(address);
+        if ( SensorPower.isValid(input)) {
+            Point point = SensorPower.generate(address, hostname, input).getInfluxdbPoint();
+            Config.getDBConnection().save(point);
+        } else if ( SensorTemp.isValid(input)) {
+            Point point = SensorTemp.generate(address, hostname, input).getInfluxdbPoint();
+            Config.getDBConnection().save(point);
+        } else {
+            LOG.warn("Found sensor thats not understood " + hostname + "@" + address);
+        }
     }
 }

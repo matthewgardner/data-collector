@@ -39,6 +39,8 @@ public abstract class Config {
     private static int influxBatchMaxSize;
     private static int influxBatchMaxTimeMs;
 
+    private static String baseAddress;
+
     private static String storageMethod;
 
     private static final Map<String, String> DEVICE_NAMES = new HashMap<>();
@@ -76,6 +78,8 @@ public abstract class Config {
 
         storageMethod = "influxdb";
 
+        baseAddress = "192.168.1.";
+
         DEVICE_NAMES.clear();
         DEVICE_SOURCES.clear();
         dbConnection = null;
@@ -107,6 +111,7 @@ public abstract class Config {
         influxBatch = Boolean.valueOf(props.getProperty("influxBatch", influxGzip?"true":"false"));
         influxBatchMaxSize = Integer.valueOf(props.getProperty("influxBatchMaxSize", String.valueOf(influxBatchMaxSize)));
         influxBatchMaxTimeMs = Integer.valueOf(props.getProperty("influxBatchMaxTime", String.valueOf(influxBatchMaxTimeMs)));
+        baseAddress = props.getProperty("baseAddress", baseAddress);
     }
 
 
@@ -240,10 +245,13 @@ public abstract class Config {
         return influxBatchMaxTimeMs;
     }
 
+    public static String getBaseAddress(){
+        return baseAddress;
+    }
+
     public static Set<String> getDeviceAddresses(){
         return DEVICE_NAMES.keySet();
     }
-
     public static String getDeviceFriendlyName(String address){
         return DEVICE_NAMES.containsKey(address)? DEVICE_NAMES.get(address):address;
     }

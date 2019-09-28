@@ -35,4 +35,12 @@ public class SensorTemp {
       return p.build();
   }
 
+  public static boolean isValid(String input){
+     try {
+      JSONObject inputObj = new JSONObject(input);
+      JSONObject statusObj = inputObj.getJSONObject("StatusSNS");
+      return statusObj.has("SI7021");
+      } catch (Exception e) {}
+      return false;
+   }
 }

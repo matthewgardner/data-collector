@@ -1,7 +1,5 @@
 package com.ltp;
 
-import com.ltp.config.Config;
-
 import org.apache.log4j.Logger;
 
 public class Main {
@@ -10,16 +8,18 @@ public class Main {
 
     public static void main(String[] args) {
 
-        LOG.info("Storage is " + Config.getDBConnection().getClass());
+        DeviceDiscoveryThread sensorDiscovery = new DeviceDiscoveryThread();
+        LOG.info("Starting intial scan");
+        // Initial population of sensors
+        sensorDiscovery.run();
 
-        LOG.info("List of Devices");
-        for (String address : Config.getDeviceAddresses()) {
-            LOG.info("{ 'address' : '" + address + "', 'type' : '" + Config.getDeviceType(address)
-                    + "', 'friendlyName' : '" + Config.getDeviceFriendlyName(address) + "'}");
-        }
+        LOG.info("Starting data collection");
+        // Kick off timer to search for more
+        sensorDiscovery.start();
 
-        ExternalMonitorThread monitor = new ExternalMonitorThread();
-        monitor.start();
+        // Read sensors
+        ExternalMonitorThread sensorMonitor = new ExternalMonitorThread();
+        sensorMonitor.start();
 
         try {
             Thread.currentThread().join();
@@ -27,4 +27,5 @@ public class Main {
         //System.exit(0); // due to a bug in the InfluxDB library, we have to force the exit as a
                         // workaround. See: https://github.com/influxdata/influxdb-java/issues/359
     }
+
 }

@@ -46,4 +46,13 @@ public class SensorPower {
       p.addField("apparent_power", this.apparentPower);
       return p.build();
   }
+
+  public static boolean isValid(String input){
+      try {
+         JSONObject inputObj = new JSONObject(input);
+         JSONObject statusObj = inputObj.getJSONObject("StatusSNS");
+         return statusObj.has("ENERGY");
+      } catch (Exception e) {}
+      return false;
+}
 }
