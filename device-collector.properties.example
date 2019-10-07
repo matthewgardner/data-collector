@@ -43,3 +43,12 @@
 # Maximum number of datapoints and maximum time waited in milliseconds before sending a batch. Has no effect if batch mode disabled.
 #influxBatchMaxSize=2000
 #influxBatchMaxTime=100
+
+# Use to overide default IP address range
+#deviceDiscoveryBaseAddress=192.168.1.
+# Set the start IP range
+#deviceDiscoveryStartRange=100
+# Set the end IP range
+#deviceDiscoveryStopRange=255
+# Set the threadpoolsize for looking for devices in IP range
+#deviceDiscoveryThreadPool=1

@@ -27,6 +27,8 @@ public class SensorPower {
       JSONObject inputObj = new JSONObject(input);
       JSONObject statusObj = inputObj.getJSONObject("StatusSNS");
       JSONObject energyObj = statusObj.getJSONObject("ENERGY");
+
+      // TODO: Handle Null
       Double voltage = energyObj.getDouble("Voltage");
       Double current = energyObj.getDouble("Current");
       Double power = energyObj.getDouble("Power");

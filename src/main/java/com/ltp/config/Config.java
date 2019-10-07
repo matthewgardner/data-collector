@@ -39,7 +39,10 @@ public abstract class Config {
     private static int influxBatchMaxSize;
     private static int influxBatchMaxTimeMs;
 
-    private static String baseAddress;
+    private static String deviceDiscoveryBaseAddress;
+    private static int deviceDiscoveryStartRange;
+    private static int deviceDiscoveryStopRange;
+    private static int deviceDiscoveryThreadPool;
 
     private static String storageMethod;
 
@@ -78,7 +81,10 @@ public abstract class Config {
 
         storageMethod = "influxdb";
 
-        baseAddress = "192.168.1.";
+        deviceDiscoveryBaseAddress = "192.168.1.";
+        deviceDiscoveryStartRange = 1;
+        deviceDiscoveryStopRange = 255;
+        deviceDiscoveryThreadPool = 100;
 
         DEVICE_NAMES.clear();
         DEVICE_SOURCES.clear();
@@ -100,6 +106,8 @@ public abstract class Config {
     }
 
     public static void readConfigFromProperties(final Properties props) {
+
+        // Influxdb Config
         influxUrl = props.getProperty("influxUrl", influxUrl);
         influxDatabase = props.getProperty("influxDatabase", influxDatabase);
         influxMeasurement = props.getProperty("influxMeasurement", influxMeasurement);
@@ -111,7 +119,14 @@ public abstract class Config {
         influxBatch = Boolean.valueOf(props.getProperty("influxBatch", influxGzip?"true":"false"));
         influxBatchMaxSize = Integer.valueOf(props.getProperty("influxBatchMaxSize", String.valueOf(influxBatchMaxSize)));
         influxBatchMaxTimeMs = Integer.valueOf(props.getProperty("influxBatchMaxTime", String.valueOf(influxBatchMaxTimeMs)));
-        baseAddress = props.getProperty("baseAddress", baseAddress);
+        
+        // Device discovery Thread Config
+        deviceDiscoveryBaseAddress = props.getProperty("deviceDiscoveryBaseAddress", deviceDiscoveryBaseAddress);
+        deviceDiscoveryStartRange = Integer.valueOf(props.getProperty("deviceDiscoveryStartRange", String.valueOf(deviceDiscoveryStartRange)));
+        deviceDiscoveryStopRange = Integer.valueOf(props.getProperty("deviceDiscoveryStopRange", String.valueOf(deviceDiscoveryStopRange)));
+        deviceDiscoveryThreadPool = Integer.valueOf(props.getProperty("deviceDiscoveryThreadPool", String.valueOf(deviceDiscoveryThreadPool)));
+
+
     }
 
 
@@ -245,8 +260,20 @@ public abstract class Config {
         return influxBatchMaxTimeMs;
     }
 
-    public static String getBaseAddress(){
-        return baseAddress;
+    public static String getDeviceDiscoveryBaseAddress(){
+        return deviceDiscoveryBaseAddress;
+    }
+
+    public static int getDeviceDiscoveryStartRange(){
+        return deviceDiscoveryStartRange;
+    }
+
+    public static int getDeviceDiscoveryStopRange(){
+        return deviceDiscoveryStopRange;
+    }
+
+    public static int getDeviceDiscoveryThreadPool(){
+        return deviceDiscoveryThreadPool;
     }
 
     public static Set<String> getDeviceAddresses(){

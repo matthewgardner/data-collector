@@ -9,7 +9,7 @@
             "name": "CodeLens (Launch) - Main",
             "request": "launch",
             "mainClass": "com.ltp.Main",
-            "projectName": "ruuvi-collector"
+            "projectName": "data-collector"
         },
         {
             "type": "java",

@@ -21,6 +21,7 @@ public class SensorTemp {
       JSONObject inputObj = new JSONObject(input);
       JSONObject statusObj = inputObj.getJSONObject("StatusSNS");
       JSONObject energyObj = statusObj.getJSONObject("SI7021");
+      // TODO: Handle Null
       Double temperature = energyObj.getDouble("Temperature");
       Double humidity = energyObj.getDouble("Humidity");
       SensorTemp sensor = new SensorTemp(address, name, temperature, humidity);

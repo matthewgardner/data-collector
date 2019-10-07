@@ -23,7 +23,6 @@ public class ExternalMonitorThread implements Runnable {
     private static final Logger LOG = Logger.getLogger(ExternalMonitorThread.class);
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-
     public void start() {
         final Runnable monitorRunner = new ExternalMonitorThread();
         scheduler.scheduleAtFixedRate(monitorRunner, 10, 10, TimeUnit.SECONDS);
@@ -44,22 +43,26 @@ public class ExternalMonitorThread implements Runnable {
     private static void readUrl(String address, String hostname) {
         try {
             URL url = new URL("http://" + address + "/cm?cmnd=status%2010");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Accept", "application/json");
-            if (conn.getResponseCode() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+            if (connection.getResponseCode() != 200) {
+                DeviceDiscoveryThread.remove(address);
+                throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
             }
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-            String output;
-            while ((output = br.readLine()) != null) {
-                processInput(address, hostname, output);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String output;
+                while ((output = br.readLine()) != null) {
+                    processInput(address, hostname, output);
+                }
             }
-            conn.disconnect();
         } catch (MalformedURLException e) {
             LOG.error("MalformedURLException", e);
+            DeviceDiscoveryThread.remove(address);
         } catch (IOException e) {
             LOG.error("IOException", e);
+            DeviceDiscoveryThread.remove(address);
+
         }
     }
 

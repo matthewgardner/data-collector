@@ -26,15 +26,17 @@ public class DeviceDiscoveryThread implements Runnable {
 
     public void start() {
         final Runnable discoveryRunner = new DeviceDiscoveryThread();
-        scheduler.scheduleAtFixedRate(discoveryRunner, 10, 2 * 60, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(discoveryRunner, 10, 60 * 60, TimeUnit.SECONDS);
     }
 
     public void run() {
-        //TODO: make Threadpool configurable
-        ForkJoinPool forkJoinPool = new ForkJoinPool(100);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(Config.getDeviceDiscoveryThreadPool());
         try {
             forkJoinPool.submit(() ->
-            IntStream.range(1, 255).parallel().forEach(DeviceDiscoveryThread::checkPort)).get();
+            IntStream.range(Config.getDeviceDiscoveryStartRange(), Config.getDeviceDiscoveryStopRange())
+                .parallel()
+                .forEach(DeviceDiscoveryThread::checkPort))
+                .get();
         } catch (InterruptedException e1) {
             LOG.error("Failed to check port (1)", e1);
         } catch (ExecutionException e1) {
@@ -48,7 +50,7 @@ public class DeviceDiscoveryThread implements Runnable {
     }
     
     private static void checkPort(Integer address) {
-        String ipAddress = Config.getBaseAddress() + address;
+        String ipAddress = Config.getDeviceDiscoveryBaseAddress() + address;
         InetAddress inetAddress;
         try {
             inetAddress = InetAddress.getByName(ipAddress);
@@ -70,4 +72,11 @@ public class DeviceDiscoveryThread implements Runnable {
     private static boolean isSonoff(String hostname) {
         return hostname != null && hostname.startsWith("sonoff");
     }
+
+	public static void remove(String address) {
+        if (addressToHostnameMap.containsKey(address)){
+            LOG.info("Sonof lost and being removed " + addressToHostnameMap.get(address) + "@" +address);
+            addressToHostnameMap.remove(address);
+        }
+	}
 }
