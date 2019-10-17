@@ -12,18 +12,12 @@ public class SensorPower {
    private Double power;
    private Double reactivePower;
    private Double apparentPower;
+   private Double total;
+   private Double today;
 
-   private SensorPower(String ipAddress, String name, Double voltage, Double current, Double power, Double reactivePower, Double apparentPower) {
-      this.ipAddress = ipAddress;
-      this.deviceName = name;
-      this.voltage = voltage;
-      this.current = current;
-      this.power = power;
-      this.reactivePower = reactivePower;
-      this.apparentPower = apparentPower;
-   }
+   private SensorPower(){}
 
-   public static SensorPower generate(String address, String name, String input) {
+   public static SensorPower generate(String ipAddress, String name, String input) {
       JSONObject inputObj = new JSONObject(input);
       JSONObject statusObj = inputObj.getJSONObject("StatusSNS");
       JSONObject energyObj = statusObj.getJSONObject("ENERGY");
@@ -34,7 +28,21 @@ public class SensorPower {
       Double power = energyObj.getDouble("Power");
       Double reactivePower = energyObj.getDouble("ReactivePower");
       Double apparentPower = energyObj.getDouble("ApparentPower");
-      SensorPower sensorPower = new SensorPower(address, name, voltage, current, power, reactivePower, apparentPower);
+      Double total = energyObj.getDouble("Total");
+      Double today = energyObj.getDouble("Today");
+
+
+      SensorPower sensorPower = new SensorPower();
+      sensorPower.ipAddress = ipAddress;
+      sensorPower.deviceName = name;
+      sensorPower.voltage = voltage;
+      sensorPower.current = current;
+      sensorPower.power = power;
+      sensorPower.reactivePower = reactivePower;
+      sensorPower.apparentPower = apparentPower;
+      sensorPower.total = total;
+      sensorPower.today = today;
+
       return sensorPower;
   }
 
@@ -46,6 +54,8 @@ public class SensorPower {
       p.addField("power", this.power);
       p.addField("reactive_power", this.reactivePower);
       p.addField("apparent_power", this.apparentPower);
+      p.addField("total", this.total);
+      p.addField("today", this.today);
       return p.build();
   }
 

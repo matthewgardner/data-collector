@@ -1,0 +1,2 @@
+{"StatusSNS":{"Time":"2019-10-09T15:04:30","SI7021":{"Temperature":28.3,"Humidity":33.8},"TempUnit":"C"}}
+{"StatusSNS":{"Time":"2019-10-09T15:04:30","SI7021":{"Temperature”:NULL,”Humidity":NULL},"TempUnit":NULL}}
