@@ -29,11 +29,11 @@ public class ExternalMonitorThread implements Runnable {
     }
 
     public void run() {
-        
+
         try {
             Map<String, String> sensors = DeviceDiscoveryThread.getSonoffMap();
-            for (String address : sensors.keySet()) {
-                readUrl(address,sensors.get(address));
+            for (Map.Entry<String, String> entry : sensors.entrySet()) {
+                readUrl(entry.getKey(), entry.getValue());
             }
         } catch (Exception e) {
             LOG.error("InterruptedException", e);
@@ -67,12 +67,12 @@ public class ExternalMonitorThread implements Runnable {
     }
 
     private static void processInput(String address, String hostname, String input) {
-        //TODO: Do we want to overide the name with something friendly
-        //String deviceName = Config.getDeviceFriendlyName(address);
-        if ( SensorPower.isValid(input)) {
+        // TODO: Do we want to overide the name with something friendly
+        // String deviceName = Config.getDeviceFriendlyName(address);
+        if (SensorPower.isValid(input)) {
             Point point = SensorPower.generate(address, hostname, input).getInfluxdbPoint();
             Config.getDBConnection().save(point);
-        } else if ( SensorTemp.isValid(input)) {
+        } else if (SensorTemp.isValid(input)) {
             Point point = SensorTemp.generate(address, hostname, input).getInfluxdbPoint();
             Config.getDBConnection().save(point);
         } else {
